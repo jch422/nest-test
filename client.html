@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+      const socket = io('http://localhost:3000', {
+        transports: ['websocket'],
+        upgrade: false,
+        forceNew: true,
+      });
+
+      socket.on('connect', () => {
+        console.log('Connected to server');
+        document.getElementById('status').textContent = 'Connected';
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+        document.getElementById('status').textContent = 'Connection error';
+      });
+
+      function sendMessage() {
+        const input = document.getElementById('messageInput');
+        socket.emit('message', input.value);
+        input.value = '';
+      }
+
+      socket.on('message', (data) => {
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML += '<p>Received: ' + data + '</p>';
+      });
+
+      function sendPing() {
+        console.log('Sending ping to server');
+        socket.emit('ping');
+      }
+
+      socket.on('pong', (data) => {
+        console.log('Received pong from server:', data);
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML += '<p>Pong received: ' + data + '</p>';
+      });
+    </script>
+  </head>
+  <body>
+    <div id="status">Disconnected</div>
+    <ul id="messages"></ul>
+    <input id="messageInput" autocomplete="off" /><button
+      onclick="sendMessage()"
+    >
+      Send Message
+    </button>
+    <button onclick="sendPing()">Send Ping</button>
+  </body>
+</html>
